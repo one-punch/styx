@@ -44,12 +44,12 @@
 		</property>
 	</bean>
 	<bean id="viewResolver"
-		class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
-		<property name="viewClass"
-			value="org.springframework.web.servlet.view.velocity.VelocityView" />
-		<property name="contentType">
-			<value>text/html;charset=UTF-8</value>
-		</property>
+		class="org.springframework.web.servlet.view.velocity.VelocityLayoutViewResolver">
+			<property name="cache" value="false" />
+			<property name="layoutUrl" value="/WEB-INF/templates/layout/default.html" />
+      <property name="exposeSpringMacroHelpers" value="true" />
+      <property name="contentType" value="text/html;charset=UTF-8" />
+      <property name="viewClass" value="org.springframework.web.servlet.view.velocity.VelocityLayoutView" />
 	</bean>
 	<!-- property-placeholder是一个属性遍历器，定位一个属性文件，属性文件存放的是jdbc一些连接数据 -->
 	<context:property-placeholder location="classpath:/config/xxshopdb.properties" />
@@ -80,7 +80,7 @@
 			<bean
 				class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 				<property name="database" value="MYSQL" />
-				<property name="showSql" value="true" />
+				<property name="showSql" value="false" />
 				<property name="generateDdl" value="false" />
 			</bean>
 		</property>
