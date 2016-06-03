@@ -172,6 +172,59 @@ import org.springframework.web.servlet.ModelAndView;
    @Autowired
    private DatabaseTools databaseTools;
 
+  @SecurityMapping(title="发布商品", value="/seller/add_products", rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
+  @RequestMapping({"/seller/add_products.htm"})
+  public ModelAndView add_products(HttpServletRequest request, HttpServletResponse response, String id)
+  {
+    User user = this.userService.getObjById(
+      SecurityUserHolder.getCurrentUser().getId());
+    Map<String, Object> adminParams = new HashMap<String, Object>();
+    adminParams.put("userRole", "ADMIN");
+    List<User> admins = this.userService.query(
+          "select obj from User obj where obj.userRole=:userRole",
+          adminParams, -1, -1);
+    if(admins.isEmpty()){
+      ModelAndView mv = new JModelAndView("error.html",
+        this.configService.getSysConfig(),
+        this.userConfigService.getUserConfig(), 1, request, response);
+      mv.addObject("op_title", "xxxxxxx");
+      mv.addObject("url", CommUtil.getURL(request) +
+         "/seller/index.htm");
+       return mv;
+    }
+
+    User admin = admins.get(0);
+    Store parentStore = admin.getStore();
+    List<Goods> goodsList = parentStore.getGoods_list();
+    request.getSession(false).removeAttribute("goods_class_info");
+    int store_status = user.getStore() == null ? 0 : user.getStore()
+      .getStore_status();
+    ModelAndView mv = new JModelAndView(
+         "user/default/usercenter/add_products.html",
+         this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 0, request,
+         response);
+    switch(store_status){
+      case 1:
+        mv.addObject("op_title", "您的店铺在审核中，不能发布商品");
+        mv.addObject("url", CommUtil.getURL(request) + "/seller/index.htm");
+        return mv;
+      case 3:
+        mv.addObject("op_title", "您的店铺已被关闭，不能发布商品");
+        mv.addObject("url", CommUtil.getURL(request) + "/seller/index.htm");
+        return mv;
+      case 2:
+        mv.addObject("goodsList", goodsList);
+        return mv;
+      default:
+        mv.addObject("op_title", "您尚未开通店铺，不能发布商品");
+        mv.addObject("url", CommUtil.getURL(request) + "/seller/index.htm");
+        return mv;
+    }
+
+  }
+
+
    @SecurityMapping(title="发布商品第一步", value="/seller/add_goods_first.htm*", rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/add_goods_first.htm"})
    public ModelAndView add_goods_first(HttpServletRequest request, HttpServletResponse response, String id)
