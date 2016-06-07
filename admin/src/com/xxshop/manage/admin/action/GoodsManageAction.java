@@ -1,17 +1,19 @@
  package com.xxshop.manage.admin.action;
- 
+
  import com.easyjf.beans.BeanUtils;
  import com.easyjf.beans.BeanWrapper;
 import com.xxshop.core.annotation.SecurityMapping;
 import com.xxshop.core.domain.virtual.SysMap;
 import com.xxshop.core.mv.JModelAndView;
 import com.xxshop.core.query.support.IPageList;
+import com.xxshop.core.security.support.SecurityUserHolder;
 import com.xxshop.core.tools.CommUtil;
 import com.xxshop.core.tools.WebForm;
 import com.xxshop.core.tools.database.DatabaseTools;
 import com.xxshop.foundation.domain.Evaluate;
 import com.xxshop.foundation.domain.Goods;
 import com.xxshop.foundation.domain.GoodsCart;
+import com.xxshop.foundation.domain.GoodsClass;
 import com.xxshop.foundation.domain.Message;
 import com.xxshop.foundation.domain.OrderForm;
 import com.xxshop.foundation.domain.Store;
@@ -56,58 +58,58 @@ import com.xxshop.manage.admin.tools.MsgTools;
  import org.springframework.stereotype.Controller;
  import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
- 
+
  @Controller
  public class GoodsManageAction
  {
- 
+
    @Autowired
    private ISysConfigService configService;
- 
+
    @Autowired
    private IUserConfigService userConfigService;
- 
+
    @Autowired
    private IGoodsService goodsService;
- 
+
    @Autowired
    private IGoodsBrandService goodsBrandService;
- 
+
    @Autowired
    private IGoodsClassService goodsClassService;
- 
+
    @Autowired
    private ITemplateService templateService;
- 
+
    @Autowired
    private IUserService userService;
- 
+
    @Autowired
    private IMessageService messageService;
- 
+
    @Autowired
    private MsgTools msgTools;
- 
+
    @Autowired
    private DatabaseTools databaseTools;
- 
+
    @Autowired
    private IEvaluateService evaluateService;
- 
+
    @Autowired
    private IGoodsCartService goodsCartService;
- 
+
    @Autowired
    private IOrderFormService orderFormService;
- 
+
    @Autowired
    private IOrderFormLogService orderFormLogService;
- 
+
    @SecurityMapping(title="商品列表", value="/admin/goods_list.htm*", rtype="admin", rname="商品管理", rcode="admin_goods",rgroup="商品", display = false, rsequence = 0)
    @RequestMapping({"/admin/goods_list.htm"})
    public ModelAndView goods_list(HttpServletRequest request, HttpServletResponse response, String currentPage, String orderBy, String orderType)
    {
-     ModelAndView mv = new JModelAndView("admin/blue/goods_list.html", 
+     ModelAndView mv = new JModelAndView("admin/blue/goods_list.html",
        this.configService.getSysConfig(), this.userConfigService
        .getUserConfig(), 0, request, response);
      String url = this.configService.getSysConfig().getAddress();
@@ -115,30 +117,30 @@ import org.springframework.web.servlet.ModelAndView;
        url = CommUtil.getURL(request);
      }
      String params = "";
-     GoodsQueryObject qo = new GoodsQueryObject(currentPage, mv, orderBy, 
+     GoodsQueryObject qo = new GoodsQueryObject(currentPage, mv, orderBy,
        orderType);
      WebForm wf = new WebForm();
      wf.toQueryPo(request, qo, Goods.class, mv);
      qo.addQuery("obj.goods_status", new SysMap("goods_status", Integer.valueOf(-2)), ">");
      IPageList pList = this.goodsService.list(qo);
-     CommUtil.saveIPageList2ModelAndView(url + "/admin/goods_list.htm", "", 
+     CommUtil.saveIPageList2ModelAndView(url + "/admin/goods_list.htm", "",
        params, pList, mv);
      List gbs = this.goodsBrandService.query(
-       "select obj from GoodsBrand obj order by obj.sequence asc", 
+       "select obj from GoodsBrand obj order by obj.sequence asc",
        null, -1, -1);
      List gcs = this.goodsClassService
        .query(
-       "select obj from GoodsClass obj where obj.parent.id is null order by obj.sequence asc", 
+       "select obj from GoodsClass obj where obj.parent.id is null order by obj.sequence asc",
        null, -1, -1);
      mv.addObject("gcs", gcs);
      mv.addObject("gbs", gbs);
      return mv;
    }
- 
+
    @SecurityMapping(title="违规商品列表", value="/admin/goods_outline.htm*", rtype="admin", rname="商品管理", rcode="admin_goods",rgroup="商品", display = false, rsequence = 0)
    @RequestMapping({"/admin/goods_outline.htm"})
    public ModelAndView goods_outline(HttpServletRequest request, HttpServletResponse response, String currentPage, String orderBy, String orderType) {
-     ModelAndView mv = new JModelAndView("admin/blue/goods_outline.html", 
+     ModelAndView mv = new JModelAndView("admin/blue/goods_outline.html",
        this.configService.getSysConfig(), this.userConfigService
        .getUserConfig(), 0, request, response);
      String url = this.configService.getSysConfig().getAddress();
@@ -146,42 +148,46 @@ import org.springframework.web.servlet.ModelAndView;
        url = CommUtil.getURL(request);
      }
      String params = "";
-     GoodsQueryObject qo = new GoodsQueryObject(currentPage, mv, orderBy, 
+     GoodsQueryObject qo = new GoodsQueryObject(currentPage, mv, orderBy,
        orderType);
      WebForm wf = new WebForm();
      wf.toQueryPo(request, qo, Goods.class, mv);
      qo.addQuery("obj.goods_status", new SysMap("goods_status", Integer.valueOf(-2)), "=");
      IPageList pList = this.goodsService.list(qo);
-     CommUtil.saveIPageList2ModelAndView(url + "/admin/goods_list.htm", "", 
+     CommUtil.saveIPageList2ModelAndView(url + "/admin/goods_list.htm", "",
        params, pList, mv);
      List gbs = this.goodsBrandService.query(
-       "select obj from GoodsBrand obj order by obj.sequence asc", 
+       "select obj from GoodsBrand obj order by obj.sequence asc",
        null, -1, -1);
      List gcs = this.goodsClassService
        .query(
-       "select obj from GoodsClass obj where obj.parent.id is null order by obj.sequence asc", 
+       "select obj from GoodsClass obj where obj.parent.id is null order by obj.sequence asc",
        null, -1, -1);
      mv.addObject("gcs", gcs);
      mv.addObject("gbs", gbs);
      return mv;
    }
- 
+
    @SecurityMapping(title="商品添加", value="/admin/goods_add.htm*", rtype="admin", rname="商品管理", rcode="admin_goods",rgroup="商品", display = false, rsequence = 0)
    @RequestMapping({"/admin/goods_add.htm"})
    public ModelAndView goods_add(HttpServletRequest request, HttpServletResponse response, String currentPage)
    {
-     ModelAndView mv = new JModelAndView("admin/blue/goods_add.html", 
+     ModelAndView mv = new JModelAndView("admin/blue/goods_add.html",
        this.configService.getSysConfig(), this.userConfigService
        .getUserConfig(), 0, request, response);
+     List gcs = this.goodsClassService
+          .query("select obj from GoodsClass obj where obj.parent.id is not null and obj.display = TRUE and obj.level = 1 ORDER by obj.sequence ",
+              null, -1, -1);
+     mv.addObject("gcs", gcs);
      mv.addObject("currentPage", currentPage);
      return mv;
    }
- 
+
    @SecurityMapping(title="商品编辑", value="/admin/goods_edit.htm*", rtype="admin", rname="商品管理", rcode="admin_goods",rgroup="商品", display = false, rsequence = 0)
    @RequestMapping({"/admin/goods_edit.htm"})
    public ModelAndView goods_edit(HttpServletRequest request, HttpServletResponse response, String id, String currentPage)
    {
-     ModelAndView mv = new JModelAndView("admin/blue/goods_add.html", 
+     ModelAndView mv = new JModelAndView("admin/blue/goods_add.html",
        this.configService.getSysConfig(), this.userConfigService
        .getUserConfig(), 0, request, response);
      if ((id != null) && (!id.equals(""))) {
@@ -191,25 +197,33 @@ import org.springframework.web.servlet.ModelAndView;
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="商品保存", value="/admin/goods_save.htm*", rtype="admin", rname="商品管理", rcode="admin_goods",rgroup="商品", display = false, rsequence = 0)
    @RequestMapping({"/admin/goods_save.htm"})
-   public ModelAndView goods_save(HttpServletRequest request, HttpServletResponse response, String id, String currentPage, String cmd, String list_url, String add_url)
+   public ModelAndView goods_save(HttpServletRequest request, HttpServletResponse response, String id, String currentPage, String goods_class_id, String list_url, String add_url)
    {
      WebForm wf = new WebForm();
      Goods goods = null;
-     if (id.equals("")) {
+     if (id == null || id.equals("")) {
        goods = (Goods)wf.toPo(request, Goods.class);
        goods.setAddTime(new Date());
+       User user = this.userService.getObjById(
+           SecurityUserHolder.getCurrentUser().getId());
+        goods.setGoods_store(user.getStore());
      } else {
        Goods obj = this.goodsService.getObjById(Long.valueOf(Long.parseLong(id)));
        goods = (Goods)wf.toPo(request, obj);
      }
-     if (id.equals(""))
+     GoodsClass gc = this.goodsClassService.getObjById(
+         Long.valueOf(Long.parseLong(request.getParameter("goods_class_id"))));
+     goods.setGc(gc);
+
+     if (id == null || id.equals(""))
        this.goodsService.save(goods);
      else
        this.goodsService.update(goods);
-     ModelAndView mv = new JModelAndView("admin/blue/success.html", 
+     triggerIndex(id, goods);
+     ModelAndView mv = new JModelAndView("admin/blue/success.html",
        this.configService.getSysConfig(), this.userConfigService
        .getUserConfig(), 0, request, response);
      mv.addObject("list_url", list_url);
@@ -219,6 +233,59 @@ import org.springframework.web.servlet.ModelAndView;
      }
      return mv;
    }
+
+   private void triggerIndex(String id, Goods goods){
+    if (id ==null || id.equals("")) {
+         this.goodsService.save(goods);
+         //
+        String goods_lucene_path = System.getProperty("user.dir") +
+           File.separator + "luence" + File.separator +
+           "goods";
+
+        goods_lucene_path = "/Users/zbin/dev/tmp/lucenestore" +
+           File.separator + "luence" + File.separator +
+           "goods";
+         File file = new File(goods_lucene_path);
+         if (!file.exists()) {
+           CommUtil.createFolder(goods_lucene_path);
+         }
+         LuceneVo vo = new LuceneVo();
+         vo.setVo_id(goods.getId());
+         vo.setVo_title(goods.getGoods_name());
+         vo.setVo_content(goods.getGoods_details());
+         vo.setVo_type("goods");
+         vo.setVo_store_price(CommUtil.null2Double(goods
+           .getStore_price()));
+         vo.setVo_add_time(goods.getAddTime().getTime());
+         vo.setVo_goods_salenum(goods.getGoods_salenum());
+         LuceneUtil lucene = LuceneUtil.instance();
+         LuceneUtil.setIndex_path(goods_lucene_path);
+         lucene.writeIndex(vo);
+       } else {
+         this.goodsService.update(goods);
+
+         String goods_lucene_path = System.getProperty("user.dir") +
+           File.separator + "luence" + File.separator +
+           "goods";
+         File file = new File(goods_lucene_path);
+         if (!file.exists()) {
+           CommUtil.createFolder(goods_lucene_path);
+         }
+         LuceneVo vo = new LuceneVo();
+         vo.setVo_id(goods.getId());
+         vo.setVo_title(goods.getGoods_name());
+         vo.setVo_content(goods.getGoods_details());
+         vo.setVo_type("goods");
+         vo.setVo_store_price(CommUtil.null2Double(goods
+           .getStore_price()));
+         vo.setVo_add_time(goods.getAddTime().getTime());
+         vo.setVo_goods_salenum(goods.getGoods_salenum());
+         LuceneUtil lucene = LuceneUtil.instance();
+         LuceneUtil.setIndex_path(goods_lucene_path);
+         lucene.update(CommUtil.null2String(goods.getId()), vo);
+       }
+   }
+
    @SecurityMapping(title="商品删除", value="/admin/goods_del.htm*", rtype="admin", rname="商品管理", rcode="admin_goods",rgroup="商品", display = false, rsequence = 0)
    @RequestMapping({"/admin/goods_del.htm"})
    public String goods_del(HttpServletRequest request, String mulitId) throws Exception {
@@ -231,7 +298,7 @@ import org.springframework.web.servlet.ModelAndView;
          map.put("gid", goods.getId());
          List<GoodsCart> goodCarts = this.goodsCartService
            .query(
-           "select obj from GoodsCart obj where obj.goods.id = :gid", 
+           "select obj from GoodsCart obj where obj.goods.id = :gid",
            map, -1, -1);
          Long ofid = null;
          Long of_id;
@@ -243,7 +310,7 @@ import org.springframework.web.servlet.ModelAndView;
              this.orderFormService.delete(of_id);
            }
          }
- 
+
          List<Evaluate> evaluates = goods.getEvaluates();
          for (Evaluate e : evaluates) {
            this.evaluateService.delete(e.getId());
@@ -254,8 +321,8 @@ import org.springframework.web.servlet.ModelAndView;
          goods.getGoods_ugcs().clear();
          goods.getGoods_specs().clear();
          this.goodsService.delete(goods.getId());
- 
-         String goods_lucene_path = System.getProperty("user.dir") + 
+
+         String goods_lucene_path = System.getProperty("user.dir") +
            File.separator + "luence" + File.separator + "goods";
          File file = new File(goods_lucene_path);
          if (!file.exists()) {
@@ -264,36 +331,36 @@ import org.springframework.web.servlet.ModelAndView;
          LuceneUtil lucene = LuceneUtil.instance();
          LuceneUtil.setIndex_path(goods_lucene_path);
          lucene.delete_index(CommUtil.null2String(id));
- 
-         send_site_msg(request, 
+
+         send_site_msg(request,
            "msg_toseller_goods_delete_by_admin_notify", goods
            .getGoods_store().getUser(), goods, "商城存在违规");
        }
      }
      return "redirect:goods_list.htm";
    }
- 
+
    private void send_site_msg(HttpServletRequest request, String mark, User user, Goods goods, String reason) throws Exception
    {
      com.xxshop.foundation.domain.Template template = this.templateService.getObjByProperty("mark", mark);
      if (template.isOpen()) {
        String path = request.getSession().getServletContext()
-         .getRealPath("/") + 
+         .getRealPath("/") +
          "/vm/";
        PrintWriter pwrite = new PrintWriter(
          new OutputStreamWriter(new FileOutputStream(path + "msg.vm", false), "UTF-8"));
        pwrite.print(template.getContent());
        pwrite.flush();
        pwrite.close();
- 
+
        Properties p = new Properties();
        p.setProperty("file.resource.loader.path", request
-         .getRealPath("/") + 
+         .getRealPath("/") +
          "vm" + File.separator);
        p.setProperty("input.encoding", "UTF-8");
        p.setProperty("output.encoding", "UTF-8");
        Velocity.init(p);
-       org.apache.velocity.Template blank = Velocity.getTemplate("msg.vm", 
+       org.apache.velocity.Template blank = Velocity.getTemplate("msg.vm",
          "UTF-8");
        VelocityContext context = new VelocityContext();
        context.put("reason", reason);
@@ -302,9 +369,9 @@ import org.springframework.web.servlet.ModelAndView;
        context.put("send_time", CommUtil.formatLongDate(new Date()));
        StringWriter writer = new StringWriter();
        blank.merge(context, writer);
- 
+
        String content = writer.toString();
-       User fromUser = this.userService.getObjByProperty("userName", 
+       User fromUser = this.userService.getObjByProperty("userName",
          "admin");
        Message msg = new Message();
        msg.setAddTime(new Date());
@@ -319,7 +386,7 @@ import org.springframework.web.servlet.ModelAndView;
        writer.close();
      }
    }
- 
+
    @SecurityMapping(title="商品AJAX更新", value="/admin/goods_ajax.htm*", rtype="admin", rname="商品管理", rcode="admin_goods",rgroup="商品", display = false, rsequence = 0)
    @RequestMapping({"/admin/goods_ajax.htm"})
    public void ajax(HttpServletRequest request, HttpServletResponse response, String id, String fieldName, String value) throws ClassNotFoundException {
@@ -355,7 +422,7 @@ import org.springframework.web.servlet.ModelAndView;
      this.goodsService.update(obj);
      if (obj.getGoods_status() == 0)
      {
-       String goods_lucene_path = System.getProperty("user.dir") + 
+       String goods_lucene_path = System.getProperty("user.dir") +
          File.separator + "luence" + File.separator + "goods";
        File file = new File(goods_lucene_path);
        if (!file.exists()) {
@@ -373,7 +440,7 @@ import org.springframework.web.servlet.ModelAndView;
        LuceneUtil.setIndex_path(goods_lucene_path);
        lucene.update(CommUtil.null2String(obj.getId()), vo);
      } else {
-       String goods_lucene_path = System.getProperty("user.dir") + 
+       String goods_lucene_path = System.getProperty("user.dir") +
          File.separator + "luence" + File.separator + "goods";
        File file = new File(goods_lucene_path);
        if (!file.exists()) {

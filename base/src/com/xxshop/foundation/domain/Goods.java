@@ -36,7 +36,11 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  
    @Column(precision=12, scale=2)
    private BigDecimal goods_price;
- 
+   
+   private Integer provider_id;
+   private Integer value;
+   private Integer type;
+   
    @Column(precision=12, scale=2)
    private BigDecimal store_price;
    private int goods_inventory;
@@ -807,5 +811,30 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
    public void setCombin_price(BigDecimal combin_price) {
      this.combin_price = combin_price;
    }
+
+	public Integer getProvider_id() {
+		return provider_id;
+	}
+	
+	public void setProvider_id(Integer provider_id) {
+		this.provider_id = provider_id;
+	}
+	
+	public Integer getValue() {
+		return value;
+	}
+	
+	public void setValue(Integer value) {
+		this.value = value;
+	}
+	
+	public Integer getType() {
+		return type;
+	}
+	
+	public void setType(Integer type) {
+		this.type = type;
+	}
+   
  }
 
