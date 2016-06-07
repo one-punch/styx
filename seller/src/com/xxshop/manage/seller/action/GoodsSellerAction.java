@@ -172,7 +172,7 @@ import org.springframework.web.servlet.ModelAndView;
    @Autowired
    private DatabaseTools databaseTools;
 
-  @SecurityMapping(title="发布商品", value="/seller/add_products", rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
+  @SecurityMapping(title="发布商品", value="/seller/add_products.htm*", rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
   @RequestMapping({"/seller/add_products.htm"})
   public ModelAndView add_products(HttpServletRequest request, HttpServletResponse response, String id)
   {
