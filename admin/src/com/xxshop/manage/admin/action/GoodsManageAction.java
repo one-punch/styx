@@ -207,8 +207,7 @@ import org.springframework.web.servlet.ModelAndView;
      if (id == null || id.equals("")) {
        goods = (Goods)wf.toPo(request, Goods.class);
        goods.setAddTime(new Date());
-       User user = this.userService.getObjById(
-           SecurityUserHolder.getCurrentUser().getId());
+       User user = SecurityUserHolder.getCurrentUser();
         goods.setGoods_store(user.getStore());
      } else {
        Goods obj = this.goodsService.getObjById(Long.valueOf(Long.parseLong(id)));
@@ -222,7 +221,7 @@ import org.springframework.web.servlet.ModelAndView;
        this.goodsService.save(goods);
      else
        this.goodsService.update(goods);
-     triggerIndex(id, goods);
+//     triggerIndex(id, goods);
      ModelAndView mv = new JModelAndView("admin/blue/success.html",
        this.configService.getSysConfig(), this.userConfigService
        .getUserConfig(), 0, request, response);
