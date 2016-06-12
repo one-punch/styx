@@ -195,7 +195,21 @@ import org.springframework.web.servlet.ModelAndView;
 
     User admin = admins.get(0);
     Store parentStore = admin.getStore();
+    Store userStore = user.getStore();
+
     List<Goods> goodsList = parentStore.getGoods_list();
+    List<Goods> myGoodsList = userStore.getGoods_list();
+    if(!myGoodsList.isEmpty()){
+      for(Iterator<Goods> it = myGoodsList.iterator(); it.hasNext();){
+        for(Iterator<Goods> pait = goodsList.iterator(); pait.hasNext();){
+          Goods parentGoods = pait.next();
+          Goods myGoods = it.next();
+          if(myGoods.getParent_id()!=null && myGoods.getParent_id().equals(parentGoods.getId())){
+        	  goodsList.remove(parentGoods);
+          }
+        }
+      }
+    }
     request.getSession(false).removeAttribute("goods_class_info");
     int store_status = user.getStore() == null ? 0 : user.getStore()
       .getStore_status();
