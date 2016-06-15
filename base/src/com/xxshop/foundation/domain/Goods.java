@@ -842,7 +842,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 		return parent_id;
 	}
 
-	public void setParent_id(Integer parent_id) {
+	public void setParent_id(Long parent_id) {
 		this.parent_id = parent_id;
 	}
    
