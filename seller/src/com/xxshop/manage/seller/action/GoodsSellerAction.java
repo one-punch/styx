@@ -59,6 +59,7 @@ import com.xxshop.manage.admin.tools.StoreTools;
 import com.xxshop.manage.seller.Tools.TransportTools;
 import com.xxshop.view.web.tools.GoodsViewTools;
 import com.xxshop.view.web.tools.StoreViewTools;
+import com.xxshop.foundation.domain.Type;
 
  import java.awt.Font;
  import java.io.File;
@@ -223,11 +224,13 @@ import org.springframework.web.servlet.ModelAndView;
         mv.addObject("op_title", "您的店铺在审核中，不能发布商品");
         mv.addObject("url", CommUtil.getURL(request) + "/seller/index.htm");
         return mv;
+
       case 3:
         mv.addObject("op_title", "您的店铺已被关闭，不能发布商品");
         mv.addObject("url", CommUtil.getURL(request) + "/seller/index.htm");
         return mv;
       case 2:
+        mv.addObject("providers", Type.providers);
         mv.addObject("goodsList", goodsList);
         return mv;
       default:
