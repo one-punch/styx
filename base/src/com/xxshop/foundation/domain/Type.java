@@ -1,22 +1,22 @@
 package com.xxshop.foundation.domain;
 
 public class Type {
-  public static Provider[] providers = {new Provider("1", "移动"), new Provider("2", "电信"), new Provider("3", "联通"),}; // yd\ dx\ lt
+  public static Provider[] providers = {new Provider(1, "移动"), new Provider(2, "电信"), new Provider(3, "联通"),}; // yd\ dx\ lt
 
   static public class Provider {
-	  public String id;
+	  public Integer id;
 	  public String name;
 
-	Provider(String id, String name){
+	Provider(Integer id, String name){
 		  this.id = id;
 		  this.name = name;
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

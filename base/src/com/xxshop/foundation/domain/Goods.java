@@ -845,6 +845,23 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 	public void setParent_id(Long parent_id) {
 		this.parent_id = parent_id;
 	}
+	
+	public String getProviderName(){
+		switch(this.provider_id){
+			case 1:
+				return "中国移动";
+			case 2:
+				return "中国移动";
+			case 3:
+				return "中国移动";
+			default:
+				return "";
+		}
+	} 
+	
+	public String getTypeName(){
+		return "一流量";
+	}
    
  }
 

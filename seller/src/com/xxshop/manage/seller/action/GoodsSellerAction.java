@@ -87,7 +87,8 @@ import com.xxshop.foundation.domain.Type;
  import org.springframework.beans.factory.annotation.Autowired;
  import org.springframework.stereotype.Controller;
  import org.springframework.web.bind.annotation.RequestMapping;
- import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
  import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -241,6 +242,38 @@ import org.springframework.web.servlet.ModelAndView;
 
   }
 
+  @SecurityMapping(title="发布商品第一步", value="/seller/create_products.htm*",rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
+  @RequestMapping({"/seller/create_products.htm"})
+  public String addProducts(HttpServletRequest request, HttpServletResponse response, String[] id)
+  {	
+	  User user = this.userService.getObjById(
+		      SecurityUserHolder.getCurrentUser().getId());
+	  Store userStore = user.getStore();
+	  StringBuffer ids = new StringBuffer();
+	  for(int i=0; i < id.length; i++){
+		  ids.append(id[i]);
+		  if((i+1)<id.length){
+			  ids.append(", ");
+		  }
+	  }
+	  List<Goods> goodslist = goodsService.query(String.format("select obj from Goods as obj where obj.id in (%s)", ids.toString()), null, -1, -1);
+	  for(Iterator<Goods> it = goodslist.iterator(); it.hasNext();){
+		  Goods goods = it.next();
+		  Goods newGoods = new Goods();
+		  newGoods.setType(goods.getType());
+		  newGoods.setProvider_id(goods.getProvider_id());
+		  newGoods.setValue(goods.getValue());
+		  newGoods.setParent_id(goods.getId());
+		  newGoods.setGoods_name(goods.getGoods_name());
+		  newGoods.setGoods_price(goods.getGoods_price());
+		  newGoods.setGoods_store(userStore);
+		  newGoods.setAddTime(new Date());
+		  goodsService.save(newGoods);
+	  }
+	  
+	  return "redirect:add_products.htm";
+  }
+  
 
    @SecurityMapping(title="发布商品第一步", value="/seller/add_goods_first.htm*", rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/add_goods_first.htm"})
