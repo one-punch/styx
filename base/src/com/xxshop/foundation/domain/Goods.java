@@ -36,7 +36,13 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
  
    @Column(precision=12, scale=2)
    private BigDecimal goods_price;
- 
+   
+   private Integer provider_id;
+   private Integer value;
+   private Integer type;
+   private Long parent_id;
+   
+   
    @Column(precision=12, scale=2)
    private BigDecimal store_price;
    private int goods_inventory;
@@ -807,5 +813,55 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
    public void setCombin_price(BigDecimal combin_price) {
      this.combin_price = combin_price;
    }
+
+	public Integer getProvider_id() {
+		return provider_id;
+	}
+	
+	public void setProvider_id(Integer provider_id) {
+		this.provider_id = provider_id;
+	}
+	
+	public Integer getValue() {
+		return value;
+	}
+	
+	public void setValue(Integer value) {
+		this.value = value;
+	}
+	
+	public Integer getType() {
+		return type;
+	}
+	
+	public void setType(Integer type) {
+		this.type = type;
+	}
+
+	public Long getParent_id() {
+		return parent_id;
+	}
+
+	public void setParent_id(Long parent_id) {
+		this.parent_id = parent_id;
+	}
+	
+	public String getProviderName(){
+		switch(this.provider_id){
+			case 1:
+				return "中国移动";
+			case 2:
+				return "中国移动";
+			case 3:
+				return "中国移动";
+			default:
+				return "";
+		}
+	} 
+	
+	public String getTypeName(){
+		return "一流量";
+	}
+   
  }
 

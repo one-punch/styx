@@ -59,6 +59,7 @@ import com.xxshop.manage.admin.tools.StoreTools;
 import com.xxshop.manage.seller.Tools.TransportTools;
 import com.xxshop.view.web.tools.GoodsViewTools;
 import com.xxshop.view.web.tools.StoreViewTools;
+import com.xxshop.foundation.domain.Type;
 
  import java.awt.Font;
  import java.io.File;
@@ -86,7 +87,8 @@ import com.xxshop.view.web.tools.StoreViewTools;
  import org.springframework.beans.factory.annotation.Autowired;
  import org.springframework.stereotype.Controller;
  import org.springframework.web.bind.annotation.RequestMapping;
- import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
  import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -171,6 +173,107 @@ import org.springframework.web.servlet.ModelAndView;
 
    @Autowired
    private DatabaseTools databaseTools;
+
+  @SecurityMapping(title="发布商品", value="/seller/add_products.htm*", rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
+  @RequestMapping({"/seller/add_products.htm"})
+  public ModelAndView add_products(HttpServletRequest request, HttpServletResponse response, String id)
+  {
+    User user = this.userService.getObjById(
+      SecurityUserHolder.getCurrentUser().getId());
+    Map<String, Object> adminParams = new HashMap<String, Object>();
+    adminParams.put("userRole", "ADMIN");
+    List<User> admins = this.userService.query(
+          "select obj from User obj where obj.userRole=:userRole",
+          adminParams, -1, -1);
+    if(admins.isEmpty()){
+      ModelAndView mv = new JModelAndView("error.html",
+        this.configService.getSysConfig(),
+        this.userConfigService.getUserConfig(), 1, request, response);
+      mv.addObject("op_title", "xxxxxxx");
+      mv.addObject("url", CommUtil.getURL(request) +
+         "/seller/index.htm");
+       return mv;
+    }
+
+    User admin = admins.get(0);
+    Store parentStore = admin.getStore();
+    Store userStore = user.getStore();
+
+    List<Goods> goodsList = parentStore.getGoods_list();
+    List<Goods> myGoodsList = userStore.getGoods_list();
+    if(!myGoodsList.isEmpty()){
+      for(Iterator<Goods> it = myGoodsList.iterator(); it.hasNext();){
+        for(Iterator<Goods> pait = goodsList.iterator(); pait.hasNext();){
+          Goods parentGoods = pait.next();
+          Goods myGoods = it.next();
+          if(myGoods.getParent_id()!=null && myGoods.getParent_id().equals(parentGoods.getId())){
+        	  goodsList.remove(parentGoods);
+          }
+        }
+      }
+    }
+    request.getSession(false).removeAttribute("goods_class_info");
+    int store_status = user.getStore() == null ? 0 : user.getStore()
+      .getStore_status();
+    ModelAndView mv = new JModelAndView(
+         "user/default/usercenter/add_products.html",
+         this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 0, request,
+         response);
+    switch(store_status){
+      case 1:
+        mv.addObject("op_title", "您的店铺在审核中，不能发布商品");
+        mv.addObject("url", CommUtil.getURL(request) + "/seller/index.htm");
+        return mv;
+
+      case 3:
+        mv.addObject("op_title", "您的店铺已被关闭，不能发布商品");
+        mv.addObject("url", CommUtil.getURL(request) + "/seller/index.htm");
+        return mv;
+      case 2:
+        mv.addObject("providers", Type.providers);
+        mv.addObject("goodsList", goodsList);
+        return mv;
+      default:
+        mv.addObject("op_title", "您尚未开通店铺，不能发布商品");
+        mv.addObject("url", CommUtil.getURL(request) + "/seller/index.htm");
+        return mv;
+    }
+
+  }
+
+  @SecurityMapping(title="发布商品第一步", value="/seller/create_products.htm*",rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
+  @RequestMapping({"/seller/create_products.htm"})
+  public String addProducts(HttpServletRequest request, HttpServletResponse response, String[] id)
+  {	
+	  User user = this.userService.getObjById(
+		      SecurityUserHolder.getCurrentUser().getId());
+	  Store userStore = user.getStore();
+	  StringBuffer ids = new StringBuffer();
+	  for(int i=0; i < id.length; i++){
+		  ids.append(id[i]);
+		  if((i+1)<id.length){
+			  ids.append(", ");
+		  }
+	  }
+	  List<Goods> goodslist = goodsService.query(String.format("select obj from Goods as obj where obj.id in (%s)", ids.toString()), null, -1, -1);
+	  for(Iterator<Goods> it = goodslist.iterator(); it.hasNext();){
+		  Goods goods = it.next();
+		  Goods newGoods = new Goods();
+		  newGoods.setType(goods.getType());
+		  newGoods.setProvider_id(goods.getProvider_id());
+		  newGoods.setValue(goods.getValue());
+		  newGoods.setParent_id(goods.getId());
+		  newGoods.setGoods_name(goods.getGoods_name());
+		  newGoods.setGoods_price(goods.getGoods_price());
+		  newGoods.setGoods_store(userStore);
+		  newGoods.setAddTime(new Date());
+		  goodsService.save(newGoods);
+	  }
+	  
+	  return "redirect:add_products.htm";
+  }
+  
 
    @SecurityMapping(title="发布商品第一步", value="/seller/add_goods_first.htm*", rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/add_goods_first.htm"})
