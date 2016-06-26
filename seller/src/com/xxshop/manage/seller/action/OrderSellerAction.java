@@ -1,5 +1,5 @@
  package com.xxshop.manage.seller.action;
- 
+
          import com.xxshop.core.annotation.SecurityMapping;
 import com.xxshop.core.domain.virtual.SysMap;
 import com.xxshop.core.mv.JModelAndView;
@@ -82,138 +82,138 @@ import com.xxshop.view.web.tools.StoreViewTools;
  import org.springframework.stereotype.Controller;
  import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
- 
+
  @Controller
  public class OrderSellerAction
  {
- 
+
    @Autowired
    private ISysConfigService configService;
- 
+
    @Autowired
    private IUserConfigService userConfigService;
- 
+
    @Autowired
    private IOrderFormService orderFormService;
- 
+
    @Autowired
    private IOrderFormLogService orderFormLogService;
- 
+
    @Autowired
    private IRefundLogService refundLogService;
- 
+
    @Autowired
    private IGoodsService goodsService;
- 
+
    @Autowired
    private IGoodsReturnService goodsReturnService;
- 
+
    @Autowired
    private IGoodsReturnItemService goodsReturnItemService;
- 
+
    @Autowired
    private IGoodsReturnLogService goodsReturnLogService;
- 
+
    @Autowired
    private IGoodsCartService goodsCartService;
- 
+
    @Autowired
    private IEvaluateService evaluateService;
- 
+
    @Autowired
    private IUserService userService;
- 
+
    @Autowired
    private IIntegralLogService integralLogService;
- 
+
    @Autowired
    private IGroupGoodsService groupGoodsService;
- 
+
    @Autowired
    private ITemplateService templateService;
- 
+
    @Autowired
    private IPaymentService paymentService;
- 
+
    @Autowired
    private IExpressCompanyService expressCompayService;
- 
+
    @Autowired
    private StoreViewTools storeViewTools;
- 
+
    @Autowired
    private MsgTools msgTools;
- 
+
    @Autowired
    private PaymentTools paymentTools;
- 
+
    @SecurityMapping(title="卖家订单列表", value="/seller/order.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order.htm"})
    public ModelAndView order(HttpServletRequest request, HttpServletResponse response, String currentPage, String order_status, String order_id, String beginTime, String endTime, String buyer_userName)
    {
      ModelAndView mv = mv = new JModelAndView(
-       "user/default/usercenter/seller_order.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
-     OrderFormQueryObject ofqo = new OrderFormQueryObject(currentPage, mv, 
+     OrderFormQueryObject ofqo = new OrderFormQueryObject(currentPage, mv,
        "addTime", "desc");
-     ofqo.addQuery("obj.store.user.id", 
-       new SysMap("user_id", 
+     ofqo.addQuery("obj.store.user.id",
+       new SysMap("user_id",
        SecurityUserHolder.getCurrentUser().getId()), "=");
      if (!CommUtil.null2String(order_status).equals("")) {
        if (order_status.equals("order_submit")) {
-         ofqo.addQuery("obj.order_status", 
+         ofqo.addQuery("obj.order_status",
            new SysMap("order_status", Integer.valueOf(10)), "=");
        }
        if (order_status.equals("order_pay")) {
-         ofqo.addQuery("obj.order_status", 
+         ofqo.addQuery("obj.order_status",
            new SysMap("order_status", Integer.valueOf(20)), "=");
        }
        if (order_status.equals("order_shipping")) {
-         ofqo.addQuery("obj.order_status", 
+         ofqo.addQuery("obj.order_status",
            new SysMap("order_status", Integer.valueOf(30)), "=");
        }
        if (order_status.equals("order_receive")) {
-         ofqo.addQuery("obj.order_status", 
+         ofqo.addQuery("obj.order_status",
            new SysMap("order_status", Integer.valueOf(40)), "=");
        }
        if (order_status.equals("order_evaluate")) {
-         ofqo.addQuery("obj.order_status", 
+         ofqo.addQuery("obj.order_status",
            new SysMap("order_status", Integer.valueOf(50)), "=");
        }
        if (order_status.equals("order_finish")) {
-         ofqo.addQuery("obj.order_status", 
+         ofqo.addQuery("obj.order_status",
            new SysMap("order_status", Integer.valueOf(60)), "=");
        }
        if (order_status.equals("order_cancel")) {
-         ofqo.addQuery("obj.order_status", 
+         ofqo.addQuery("obj.order_status",
            new SysMap("order_status", Integer.valueOf(0)), "=");
        }
      }
      if (!CommUtil.null2String(order_id).equals("")) {
-       ofqo.addQuery("obj.order_id", 
-         new SysMap("order_id", "%" + order_id + 
+       ofqo.addQuery("obj.order_id",
+         new SysMap("order_id", "%" + order_id +
          "%"), "like");
      }
      if (!CommUtil.null2String(beginTime).equals("")) {
-       ofqo.addQuery("obj.addTime", 
-         new SysMap("beginTime", CommUtil.formatDate(beginTime)), 
+       ofqo.addQuery("obj.addTime",
+         new SysMap("beginTime", CommUtil.formatDate(beginTime)),
          ">=");
      }
      if (!CommUtil.null2String(endTime).equals("")) {
-       ofqo.addQuery("obj.addTime", 
+       ofqo.addQuery("obj.addTime",
          new SysMap("endTime", CommUtil.formatDate(endTime)), ">=");
      }
      if (!CommUtil.null2String(buyer_userName).equals("")) {
-       ofqo.addQuery("obj.user.userName", 
-         new SysMap("userName", 
+       ofqo.addQuery("obj.user.userName",
+         new SysMap("userName",
          buyer_userName), "=");
      }
      IPageList pList = this.orderFormService.list(ofqo);
      CommUtil.saveIPageList2ModelAndView("", "", "", pList, mv);
      mv.addObject("storeViewTools", this.storeViewTools);
      mv.addObject("order_id", order_id);
-     mv.addObject("order_status", order_status == null ? "all" : 
+     mv.addObject("order_status", order_status == null ? "all" :
        order_status);
      mv.addObject("beginTime", beginTime);
      mv.addObject("endTime", endTime);
@@ -224,12 +224,12 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_view.htm"})
    public ModelAndView order_view(HttpServletRequest request, HttpServletResponse response, String id) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/order_view.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/order_view.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
@@ -237,8 +237,8 @@ import org.springframework.web.servlet.ModelAndView;
          CommUtil.null2String(obj.getId()));
        mv.addObject("transInfo", transInfo);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您店铺中没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
@@ -249,32 +249,32 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_cancel.htm"})
    public ModelAndView order_cancel(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_cancel.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_cancel.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
        mv.addObject("currentPage", currentPage);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="卖家取消订单保存", value="/seller/order_cancel_save.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order_cancel_save.htm"})
    public String order_cancel_save(HttpServletRequest request, HttpServletResponse response, String id, String currentPage, String state_info, String other_state_info) throws Exception {
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        obj.setOrder_status(0);
@@ -291,11 +291,11 @@ import org.springframework.web.servlet.ModelAndView;
        }
        this.orderFormLogService.save(ofl);
        if (this.configService.getSysConfig().isEmailEnable()) {
-         send_email(request, obj, 
+         send_email(request, obj,
            "email_tobuyer_order_cancel_notify");
        }
        if (this.configService.getSysConfig().isSmsEnbale()) {
-         send_sms(request, obj, obj.getUser().getMobile(), 
+         send_sms(request, obj, obj.getUser().getMobile(),
            "sms_tobuyer_order_cancel_notify");
        }
      }
@@ -305,33 +305,33 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_fee.htm"})
    public ModelAndView order_fee(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_fee.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_fee.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
        mv.addObject("currentPage", currentPage);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="卖家调整订单费用保存", value="/seller/order_fee_save.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order_fee_save.htm"})
    public String order_fee_save(HttpServletRequest request, HttpServletResponse response, String id, String currentPage, String goods_amount, String ship_price, String totalPrice) throws Exception
    {
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        obj.setGoods_amount(BigDecimal.valueOf(
@@ -348,11 +348,11 @@ import org.springframework.web.servlet.ModelAndView;
        ofl.setOf(obj);
        this.orderFormLogService.save(ofl);
        if (this.configService.getSysConfig().isEmailEnable()) {
-         send_email(request, obj, 
+         send_email(request, obj,
            "email_tobuyer_order_update_fee_notify");
        }
        if (this.configService.getSysConfig().isSmsEnbale()) {
-         send_sms(request, obj, obj.getUser().getMobile(), 
+         send_sms(request, obj, obj.getUser().getMobile(),
            "sms_tobuyer_order_fee_notify");
        }
      }
@@ -362,44 +362,44 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/seller_order_outline.htm"})
    public ModelAndView seller_order_outline(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_outline.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_outline.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
        mv.addObject("currentPage", currentPage);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="线下付款确认保存", value="/seller/seller_order_outline_save.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/seller_order_outline_save.htm"})
    public String seller_order_outline_save(HttpServletRequest request, HttpServletResponse response, String id, String currentPage, String state_info) throws Exception {
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        obj.setOrder_status(20);
        this.orderFormService.update(obj);
- 
+
        for (GoodsCart gc : obj.getGcs()) {
          Goods goods = gc.getGoods();
          if ((goods.getGroup() != null) && (goods.getGroup_buy() == 2)) {
            for (GroupGoods gg : goods.getGroup_goods_list()) {
              if (gg.getGroup().equals(goods.getGroup().getId())) {
                gg.setGg_count(gg.getGg_count() - gc.getCount());
-               gg.setGg_def_count(gg.getGg_def_count() + 
+               gg.setGg_def_count(gg.getGg_def_count() +
                  gc.getCount());
                this.groupGoodsService.update(gg);
              }
@@ -412,36 +412,36 @@ import org.springframework.web.servlet.ModelAndView;
          String[] gsp_list = new String[gsps.size()];
          gsps.toArray(gsp_list);
          goods.setGoods_salenum(goods.getGoods_salenum() + gc.getCount());
-         String inventory_type = goods.getInventory_type() == null ? "all" : 
+         String inventory_type = goods.getInventory_type() == null ? "all" :
            goods.getInventory_type();
          Map temp;
          if (inventory_type.equals("all")) {
-           goods.setGoods_inventory(goods.getGoods_inventory() - 
+           goods.setGoods_inventory(goods.getGoods_inventory() -
              gc.getCount());
          } else {
-           List list = (List)Json.fromJson(ArrayList.class, 
+           List list = (List)Json.fromJson(ArrayList.class,
              goods.getGoods_inventory_detail());
            for (Iterator localIterator4 = list.iterator(); localIterator4.hasNext(); ) { temp = (Map)localIterator4.next();
-             String[] temp_ids = 
+             String[] temp_ids =
                CommUtil.null2String(temp.get("id")).split("_");
              Arrays.sort(temp_ids);
              Arrays.sort(gsp_list);
              if (Arrays.equals(temp_ids, gsp_list)) {
                temp.put(
-                 "count", 
-                 Integer.valueOf(CommUtil.null2Int(temp.get("count")) - 
+                 "count",
+                 Integer.valueOf(CommUtil.null2Int(temp.get("count")) -
                  gc.getCount()));
              }
            }
-           goods.setGoods_inventory_detail(Json.toJson(list, 
+           goods.setGoods_inventory_detail(Json.toJson(list,
              JsonFormat.compact()));
          }
          for (GroupGoods gg : goods.getGroup_goods_list()) {
-           if ((!gg.getGroup().getId().equals(goods.getGroup().getId())) || 
+           if ((!gg.getGroup().getId().equals(goods.getGroup().getId())) ||
              (gg.getGg_count() != 0)) continue;
            goods.setGroup_buy(3);
          }
- 
+
          this.goodsService.update(goods);
        }
        OrderFormLog ofl = new OrderFormLog();
@@ -452,11 +452,11 @@ import org.springframework.web.servlet.ModelAndView;
        ofl.setState_info(state_info);
        this.orderFormLogService.save(ofl);
        if (this.configService.getSysConfig().isEmailEnable()) {
-         send_email(request, obj, 
+         send_email(request, obj,
            "email_tobuyer_order_outline_pay_ok_notify");
        }
        if (this.configService.getSysConfig().isSmsEnbale()) {
-         send_sms(request, obj, obj.getUser().getMobile(), 
+         send_sms(request, obj, obj.getUser().getMobile(),
            "sms_tobuyer_order_outline_pay_ok_notify");
        }
      }
@@ -466,21 +466,21 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_shipping.htm"})
    public ModelAndView order_shipping(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_shipping.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_shipping.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
        mv.addObject("currentPage", currentPage);
- 
+
        Map map = new HashMap();
        map.put("oid", CommUtil.null2Long(id));
        List<GoodsCart> goodsCarts = this.goodsCartService.query(
-         "select obj from GoodsCart obj where obj.of.id = :oid", 
+         "select obj from GoodsCart obj where obj.of.id = :oid",
          map, -1, -1);
        List deliveryGoods = new ArrayList();
        boolean physicalGoods = false;
@@ -494,21 +494,21 @@ import org.springframework.web.servlet.ModelAndView;
        Map params = new HashMap();
        params.put("status", Integer.valueOf(0));
        List expressCompanys = this.expressCompayService
-         .query("select obj from ExpressCompany obj where obj.company_status=:status order by company_sequence asc", 
+         .query("select obj from ExpressCompany obj where obj.company_status=:status order by company_sequence asc",
          params, -1, -1);
        mv.addObject("expressCompanys", expressCompanys);
        mv.addObject("physicalGoods", Boolean.valueOf(physicalGoods));
        mv.addObject("deliveryGoods", deliveryGoods);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="卖家确认发货保存", value="/seller/order_shipping_save.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order_shipping_save.htm"})
    public String order_shipping_save(HttpServletRequest request, HttpServletResponse response, String id, String currentPage, String shipCode, String state_info, String order_seller_intro, String ec_id) throws Exception
@@ -517,7 +517,7 @@ import org.springframework.web.servlet.ModelAndView;
        .getObjById(CommUtil.null2Long(id));
      ExpressCompany ec = this.expressCompayService.getObjById(
        CommUtil.null2Long(ec_id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        obj.setOrder_status(30);
@@ -537,16 +537,16 @@ import org.springframework.web.servlet.ModelAndView;
          send_email(request, obj, "email_tobuyer_order_ship_notify");
        }
        if (this.configService.getSysConfig().isSmsEnbale()) {
-         send_sms(request, obj, obj.getUser().getMobile(), 
+         send_sms(request, obj, obj.getUser().getMobile(),
            "sms_tobuyer_order_ship_notify");
        }
- 
+
        if (obj.getPayment().getMark().equals("alipay"))
        {
          boolean synch = false;
          String safe_key = "";
          String partner = "";
- 
+
          if (!CommUtil.null2String(obj.getPayment().getSafeKey())
            .equals(""))
          {
@@ -567,8 +567,8 @@ import org.springframework.web.servlet.ModelAndView;
 		           sParaTemp.put("logistics_name", ec.getCompany_name());
 		           sParaTemp.put("invoice_no", shipCode);
 		           sParaTemp.put("transport_type", ec.getCompany_type());
-		 
-		           String str1 = AlipaySubmit.buildRequest(config, "web", 
+
+		           String str1 = AlipaySubmit.buildRequest(config, "web",
 		             sParaTemp, "", "");
 		         }
            }
@@ -576,9 +576,9 @@ import org.springframework.web.servlet.ModelAndView;
          params.put("type", "admin");
          params.put("mark", "alipay");
          List payments = this.paymentService
-           .query("select obj from Payment obj where obj.type=:type and obj.mark=:mark", 
+           .query("select obj from Payment obj where obj.type=:type and obj.mark=:mark",
            params, -1, -1);
-         if ((payments.size() > 0) && 
+         if ((payments.size() > 0) &&
            (payments.get(0) != null))
          {
            if (!CommUtil.null2String(
@@ -594,39 +594,39 @@ import org.springframework.web.servlet.ModelAndView;
          }
        }
      }
- 
+
      return "redirect:order.htm?currentPage=" + currentPage;
    }
    @SecurityMapping(title="卖家修改物流", value="/seller/order_shipping_code.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order_shipping_code.htm"})
    public ModelAndView order_shipping_code(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_shipping_code.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_shipping_code.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
        mv.addObject("currentPage", currentPage);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="卖家修改物流保存", value="/seller/order_shipping_code_save.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order_shipping_code_save.htm"})
    public String order_shipping_code_save(HttpServletRequest request, HttpServletResponse response, String id, String currentPage, String shipCode, String state_info) {
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        obj.setShipCode(shipCode);
@@ -645,56 +645,56 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_refund.htm"})
    public ModelAndView order_refund(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_refund.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_refund.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
        mv.addObject("currentPage", currentPage);
        mv.addObject("paymentTools", this.paymentTools);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="卖家退款保存", value="/seller/order_refund_save.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order_refund_save.htm"})
    public String order_refund_save(HttpServletRequest request, HttpServletResponse response, String id, String currentPage, String refund, String refund_log, String refund_type) {
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
-       obj.setRefund(BigDecimal.valueOf(CommUtil.add(obj.getRefund(), 
+       obj.setRefund(BigDecimal.valueOf(CommUtil.add(obj.getRefund(),
          refund)));
        this.orderFormService.update(obj);
- 
+
        String type = "预存款";
        if (type.equals(refund_type)) {
          User seller = this.userService.getObjById(obj.getStore()
            .getUser().getId());
          seller.setAvailableBalance(BigDecimal.valueOf(
-           CommUtil.subtract(seller.getAvailableBalance(), 
+           CommUtil.subtract(seller.getAvailableBalance(),
            BigDecimal.valueOf(CommUtil.null2Double(refund)))));
          this.userService.update(seller);
          User buyer = obj.getUser();
          buyer.setAvailableBalance(BigDecimal.valueOf(CommUtil.add(
-           buyer.getAvailableBalance(), 
+           buyer.getAvailableBalance(),
            BigDecimal.valueOf(CommUtil.null2Double(refund)))));
          this.userService.update(buyer);
        }
        RefundLog log = new RefundLog();
        log.setAddTime(new Date());
-       log.setRefund_id(CommUtil.formatTime("yyyyMMddHHmmss", new Date()) + 
+       log.setRefund_id(CommUtil.formatTime("yyyyMMddHHmmss", new Date()) +
          obj.getUser().getId().toString());
        log.setOf(obj);
        log.setRefund(BigDecimal.valueOf(CommUtil.null2Double(refund)));
@@ -709,39 +709,39 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_return.htm"})
    public ModelAndView order_return(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_return.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_return.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
        mv.addObject("currentPage", currentPage);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="卖家退货保存", value="/seller/order_return_save.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order_return_save.htm"})
    public String order_return_save(HttpServletRequest request, HttpServletResponse response, String id, String return_info, String currentPage) {
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        Enumeration enum1 = request.getParameterNames();
        GoodsReturn gr = new GoodsReturn();
        gr.setAddTime(new Date());
        gr.setOf(obj);
-       gr.setReturn_id(CommUtil.formatTime("yyyyMMddHHmmss", new Date()) + 
+       gr.setReturn_id(CommUtil.formatTime("yyyyMMddHHmmss", new Date()) +
          obj.getUser().getId().toString());
        gr.setUser(SecurityUserHolder.getCurrentUser());
        gr.setReturn_info(return_info);
@@ -766,10 +766,10 @@ import org.springframework.web.servlet.ModelAndView;
              }
              item.setSpec_info(gc.getSpec_info());
              this.goodsReturnItemService.save(item);
- 
+
              Goods goods = gc.getGoods();
              if (goods.getInventory_type().equals("all")) {
-               goods.setGoods_inventory(goods.getGoods_inventory() + 
+               goods.setGoods_inventory(goods.getGoods_inventory() +
                  count);
              } else {
                Object gsps = new ArrayList();
@@ -778,7 +778,7 @@ import org.springframework.web.servlet.ModelAndView;
                }
                String[] gsp_list = new String[((List)gsps).size()];
                ((List)gsps).toArray(gsp_list);
-               List<Map> list = (List)Json.fromJson(ArrayList.class, 
+               List<Map> list = (List)Json.fromJson(ArrayList.class,
                  goods.getGoods_inventory_detail());
                for (Map temp : list) {
                  String[] temp_ids = CommUtil.null2String(
@@ -787,53 +787,53 @@ import org.springframework.web.servlet.ModelAndView;
                  Arrays.sort(gsp_list);
                  if (Arrays.equals(temp_ids, gsp_list)) {
                    temp.put(
-                     "count", 
-                     Integer.valueOf(CommUtil.null2Int(temp.get("count")) + 
+                     "count",
+                     Integer.valueOf(CommUtil.null2Int(temp.get("count")) +
                      count));
                  }
                }
-               goods.setGoods_inventory_detail(Json.toJson(list, 
+               goods.setGoods_inventory_detail(Json.toJson(list,
                  JsonFormat.compact()));
              }
              goods.setGoods_salenum(goods.getGoods_salenum() - count);
              this.goodsService.update(goods);
- 
+
              if (obj.getPayment().getMark().equals("balance")) {
                BigDecimal balance = goods.getGoods_current_price();
                User seller = this.userService
                  .getObjById(
                  SecurityUserHolder.getCurrentUser().getId());
- 
+
                if (this.configService.getSysConfig()
                  .getBalance_fenrun() == 1) {
                  Object params = new HashMap();
                  ((Map)params).put("type", "admin");
                  ((Map)params).put("mark", "balance");
                  List payments = this.paymentService
-                   .query("select obj from Payment obj where obj.type=:type and obj.mark=:mark", 
+                   .query("select obj from Payment obj where obj.type=:type and obj.mark=:mark",
                    (Map)params, -1, -1);
                  Payment shop_payment = new Payment();
                  if (payments.size() > 0) {
                    shop_payment = (Payment)payments.get(0);
                  }
- 
-                 double shop_availableBalance = 
-                   CommUtil.null2Double(balance) * 
+
+                 double shop_availableBalance =
+                   CommUtil.null2Double(balance) *
                    CommUtil.null2Double(shop_payment
                    .getBalance_divide_rate());
                  balance = BigDecimal.valueOf(
-                   CommUtil.null2Double(balance) - 
+                   CommUtil.null2Double(balance) -
                    shop_availableBalance);
                }
                seller.setAvailableBalance(
                  BigDecimal.valueOf(CommUtil.subtract(
-                 seller.getAvailableBalance(), 
+                 seller.getAvailableBalance(),
                  balance)));
                this.userService.update(seller);
                User buyer = obj.getUser();
                buyer.setAvailableBalance(
                  BigDecimal.valueOf(CommUtil.add(
-                 buyer.getAvailableBalance(), 
+                 buyer.getAvailableBalance(),
                  balance)));
                this.userService.update(buyer);
              }
@@ -853,32 +853,32 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_evaluate.htm"})
    public ModelAndView order_evaluate(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_evaluate.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_evaluate.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
        mv.addObject("currentPage", currentPage);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="卖家评价保存", value="/seller/order_evaluate_save.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/order_evaluate_save.htm"})
    public ModelAndView order_evaluate_save(HttpServletRequest request, HttpServletResponse response, String id, String evaluate_info, String evaluate_seller_val) {
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        if (obj.getOrder_status() == 50) {
@@ -898,33 +898,33 @@ import org.springframework.web.servlet.ModelAndView;
              eva.setEvaluate_seller_user(
                SecurityUserHolder.getCurrentUser());
              eva.setEvaluate_seller_info(request
-               .getParameter("evaluate_info" + 
+               .getParameter("evaluate_info" +
                eva.getId().toString()));
              eva.setEvaluate_seller_time(new Date());
              this.evaluateService.update(eva);
              User user = obj.getUser();
-             user.setUser_credit(user.getUser_credit() + 
+             user.setUser_credit(user.getUser_credit() +
                eva.getEvaluate_seller_val());
- 
+
              if (this.configService.getSysConfig().isIntegral()) {
                int integral = 0;
- 
+
                if (this.configService.getSysConfig()
                  .getConsumptionRatio() > 0) {
                  integral = CommUtil.null2Int(Double.valueOf(CommUtil.div(obj
-                   .getTotalPrice(), 
+                   .getTotalPrice(),
                    Integer.valueOf(this.configService
                    .getSysConfig().getConsumptionRatio()))));
                }
                integral = integral > this.configService
                  .getSysConfig().getEveryIndentLimit() ? this.configService
-                 .getSysConfig().getEveryIndentLimit() : 
+                 .getSysConfig().getEveryIndentLimit() :
                  integral;
                user.setIntegral(user.getIntegral() + integral);
                this.userService.update(user);
                IntegralLog log = new IntegralLog();
                log.setAddTime(new Date());
-               log.setContent("订单" + obj.getOrder_id() + "完成增加" + 
+               log.setContent("订单" + obj.getOrder_id() + "完成增加" +
                  integral + "分");
                log.setIntegral(integral);
                log.setIntegral_user(user);
@@ -934,7 +934,7 @@ import org.springframework.web.servlet.ModelAndView;
            }
          }
        }
- 
+
        OrderFormLog ofl = new OrderFormLog();
        ofl.setAddTime(new Date());
        ofl.setLog_info("评价订单");
@@ -942,8 +942,8 @@ import org.springframework.web.servlet.ModelAndView;
        ofl.setOf(obj);
        this.orderFormLogService.save(ofl);
      }
-     ModelAndView mv = new JModelAndView("success.html", 
-       this.configService.getSysConfig(), 
+     ModelAndView mv = new JModelAndView("success.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 1, request, response);
      mv.addObject("op_title", "订单评价成功！");
      mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
@@ -953,8 +953,8 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_print.htm"})
    public ModelAndView order_print(HttpServletRequest request, HttpServletResponse response, String id) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/order_print.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/order_print.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      if ((id != null) && (!id.equals(""))) {
        OrderForm orderform = this.orderFormService.getObjById(
@@ -967,12 +967,12 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/ship_view.htm"})
    public ModelAndView order_ship_view(HttpServletRequest request, HttpServletResponse response, String id) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/order_ship_view.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/order_ship_view.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        mv.addObject("obj", obj);
@@ -980,26 +980,26 @@ import org.springframework.web.servlet.ModelAndView;
          CommUtil.null2String(obj.getId()));
        mv.addObject("transInfo", transInfo);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您店铺中没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    private TransInfo query_ship_getData(String id) {
      TransInfo info = new TransInfo();
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
      try {
        URL url = new URL(
-         "http://api.kuaidi100.com/api?id=" + 
-         this.configService.getSysConfig().getKuaidi_id() + 
+         "http://api.kuaidi100.com/api?id=" +
+         this.configService.getSysConfig().getKuaidi_id() +
          "&com=" + (
          obj.getEc() != null ? obj.getEc()
-         .getCompany_mark() : "") + "&nu=" + 
+         .getCompany_mark() : "") + "&nu=" +
          obj.getShipCode() + "&show=0&muti=1&order=asc");
        URLConnection con = url.openConnection();
        con.setAllowUserInteraction(false);
@@ -1008,7 +1008,7 @@ import org.springframework.web.servlet.ModelAndView;
        String charSet = null;
        if (type == null)
          type = con.getContentType();
-       if ((type == null) || (type.trim().length() == 0) || 
+       if ((type == null) || (type.trim().length() == 0) ||
          (type.trim().indexOf("text/html") < 0))
          return info;
        if (type.indexOf("charset=") > 0)
@@ -1023,7 +1023,7 @@ import org.springframework.web.servlet.ModelAndView;
          String newContent = new String(b, 0, numRead, charSet);
          content = content + newContent;
        }
- 
+
        info = (TransInfo)Json.fromJson(TransInfo.class, content);
        urlStream.close();
      } catch (MalformedURLException e) {
@@ -1037,38 +1037,38 @@ import org.springframework.web.servlet.ModelAndView;
    @RequestMapping({"/seller/order_query_userinfor.htm"})
    public ModelAndView seller_query_userinfor(HttpServletRequest request, HttpServletResponse response, String id) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_query_userinfor.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_query_userinfor.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
      mv.addObject("obj", obj);
      return mv;
    }
- 
+
    @SecurityMapping(title="买家退货申请详情", value="/seller/seller_order_return_apply_view.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/seller_order_return_apply_view.htm"})
    public ModelAndView seller_order_return_apply_view(HttpServletRequest request, HttpServletResponse response, String id, String currentPage) {
      ModelAndView mv = new JModelAndView(
-       "user/default/usercenter/seller_order_return_apply_view.html", 
-       this.configService.getSysConfig(), 
+       "user/default/usercenter/seller_order_return_apply_view.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 0, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getUser().getId()
        .equals(SecurityUserHolder.getCurrentUser().getId())) {
        mv.addObject("obj", obj);
      } else {
-       mv = new JModelAndView("error.html", this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("error.html", this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您没有编号为" + id + "的订单！");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
      }
      return mv;
    }
- 
+
    @SecurityMapping(title="卖家保存退货申请", value="/seller/seller_order_return.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/seller_order_return.htm"})
    public String seller_order_return(HttpServletRequest request, HttpServletResponse response, String id, String gr_id, String currentPage, String mark) throws Exception {
@@ -1090,22 +1090,22 @@ import org.springframework.web.servlet.ModelAndView;
          cal.add(6, auto_order_return);
          obj.setReturn_shipTime(cal.getTime());
          if (this.configService.getSysConfig().isEmailEnable()) {
-           send_email(request, obj, 
+           send_email(request, obj,
              "email_tobuyer_order_return_apply_ok_notify");
          }
          if (this.configService.getSysConfig().isSmsEnbale())
-           send_sms(request, obj, obj.getUser().getMobile(), 
+           send_sms(request, obj, obj.getUser().getMobile(),
              "sms_tobuyer_order_return_apply_ok_notify");
        }
      }
      else {
        obj.setOrder_status(48);
        if (this.configService.getSysConfig().isEmailEnable()) {
-         send_email(request, obj, 
+         send_email(request, obj,
            "email_tobuyer_order_return_apply_refuse_notify");
        }
        if (this.configService.getSysConfig().isSmsEnbale()) {
-         send_sms(request, obj, obj.getUser().getMobile(), 
+         send_sms(request, obj, obj.getUser().getMobile(),
            "sms_tobuyer_order_return_apply_refuse_notify");
        }
      }
@@ -1115,19 +1115,19 @@ import org.springframework.web.servlet.ModelAndView;
    @SecurityMapping(title="确认买家退货", value="/seller/seller_order_return_confirm.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/seller_order_return_confirm.htm"})
    public ModelAndView seller_order_return_confirm(HttpServletRequest request, HttpServletResponse response, String id) {
-     ModelAndView mv = new JModelAndView("error.html", 
-       this.configService.getSysConfig(), 
+     ModelAndView mv = new JModelAndView("error.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 1, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
        obj.setOrder_status(47);
        this.orderFormService.update(obj);
-       mv = new JModelAndView("success.html", 
-         this.configService.getSysConfig(), 
-         this.userConfigService.getUserConfig(), 1, request, 
+       mv = new JModelAndView("success.html",
+         this.configService.getSysConfig(),
+         this.userConfigService.getUserConfig(), 1, request,
          response);
        mv.addObject("op_title", "您已成功确认退货");
        mv.addObject("url", CommUtil.getURL(request) + "/seller/order.htm");
@@ -1140,20 +1140,20 @@ import org.springframework.web.servlet.ModelAndView;
    @SecurityMapping(title="买家退货物流详情", value="/seller/seller_order_return_ship_view.htm*", rtype="seller", rname="订单管理", rcode="order_seller", rgroup="交易管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/seller_order_return_ship_view.htm"})
    public ModelAndView seller_order_return_ship_view(HttpServletRequest request, HttpServletResponse response, String id) {
-     ModelAndView mv = new JModelAndView("error.html", 
-       this.configService.getSysConfig(), 
+     ModelAndView mv = new JModelAndView("error.html",
+       this.configService.getSysConfig(),
        this.userConfigService.getUserConfig(), 1, request, response);
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
- 
+
      if (obj.getStore().getId()
        .equals(SecurityUserHolder.getCurrentUser().getStore().getId())) {
-       if ((obj.getReturn_shipCode() != null) && 
-         (!obj.getReturn_shipCode().equals("")) && 
-         (obj.getReturn_ec() != null) && 
+       if ((obj.getReturn_shipCode() != null) &&
+         (!obj.getReturn_shipCode().equals("")) &&
+         (obj.getReturn_ec() != null) &&
          (!obj.getReturn_ec().equals(""))) {
          mv = new JModelAndView(
-           "user/default/usercenter/seller_order_return_ship_view.html", 
+           "user/default/usercenter/seller_order_return_ship_view.html",
            this.configService.getSysConfig(), this.userConfigService
            .getUserConfig(), 0, request, response);
          TransInfo transInfo = query_return_ship(
@@ -1162,7 +1162,7 @@ import org.springframework.web.servlet.ModelAndView;
          mv.addObject("transInfo", transInfo);
        } else {
          mv.addObject("op_title", "买家没有提交退货物流信息");
-         mv.addObject("url", CommUtil.getURL(request) + 
+         mv.addObject("url", CommUtil.getURL(request) +
            "/seller/order.htm");
        }
      } else {
@@ -1171,17 +1171,17 @@ import org.springframework.web.servlet.ModelAndView;
      }
      return mv;
    }
- 
+
    private TransInfo query_return_ship(String id) {
      TransInfo info = new TransInfo();
      OrderForm obj = this.orderFormService
        .getObjById(CommUtil.null2Long(id));
      try {
-       URL url = new URL("http://api.kuaidi100.com/api?id=" + 
-         this.configService.getSysConfig().getKuaidi_id() + 
+       URL url = new URL("http://api.kuaidi100.com/api?id=" +
+         this.configService.getSysConfig().getKuaidi_id() +
          "&com=" + (
          obj.getReturn_ec() != null ? obj.getReturn_ec()
-         .getCompany_mark() : "") + "&nu=" + 
+         .getCompany_mark() : "") + "&nu=" +
          obj.getReturn_shipCode() + "&show=0&muti=1&order=asc");
        URLConnection con = url.openConnection();
        con.setAllowUserInteraction(false);
@@ -1190,7 +1190,7 @@ import org.springframework.web.servlet.ModelAndView;
        String charSet = null;
        if (type == null)
          type = con.getContentType();
-       if ((type == null) || (type.trim().length() == 0) || 
+       if ((type == null) || (type.trim().length() == 0) ||
          (type.trim().indexOf("text/html") < 0))
          return info;
        if (type.indexOf("charset=") > 0)
@@ -1205,7 +1205,7 @@ import org.springframework.web.servlet.ModelAndView;
          String newContent = new String(b, 0, numRead, charSet);
          content = content + newContent;
        }
- 
+
        info = (TransInfo)Json.fromJson(TransInfo.class, content);
        urlStream.close();
      } catch (MalformedURLException e) {
@@ -1215,7 +1215,7 @@ import org.springframework.web.servlet.ModelAndView;
      }
      return info;
    }
- 
+
    private void send_email(HttpServletRequest request, OrderForm order, String mark) throws Exception
    {
      com.xxshop.foundation.domain.Template template = this.templateService.getObjByProperty("mark", mark);
@@ -1223,7 +1223,7 @@ import org.springframework.web.servlet.ModelAndView;
        String email = order.getUser().getEmail();
        String subject = template.getTitle();
        String path = request.getSession().getServletContext()
-         .getRealPath("") + 
+         .getRealPath("") +
          File.separator + "vm" + File.separator;
        if (!CommUtil.fileExist(path)) {
          CommUtil.createFolder(path);
@@ -1233,15 +1233,15 @@ import org.springframework.web.servlet.ModelAndView;
        pwrite.print(template.getContent());
        pwrite.flush();
        pwrite.close();
- 
+
        Properties p = new Properties();
-       p.setProperty("file.resource.loader.path", 
-         request.getRealPath("") + File.separator + "vm" + 
+       p.setProperty("file.resource.loader.path",
+         request.getRealPath("") + File.separator + "vm" +
          File.separator);
        p.setProperty("input.encoding", "UTF-8");
        p.setProperty("output.encoding", "UTF-8");
        Velocity.init(p);
-       org.apache.velocity.Template blank = Velocity.getTemplate("msg.vm", 
+       org.apache.velocity.Template blank = Velocity.getTemplate("msg.vm",
          "UTF-8");
        VelocityContext context = new VelocityContext();
        context.put("buyer", order.getUser());
@@ -1252,18 +1252,18 @@ import org.springframework.web.servlet.ModelAndView;
        context.put("order", order);
        StringWriter writer = new StringWriter();
        blank.merge(context, writer);
- 
+
        String content = writer.toString();
        this.msgTools.sendEmail(email, subject, content);
      }
    }
- 
+
    private void send_sms(HttpServletRequest request, OrderForm order, String mobile, String mark) throws Exception
    {
      com.xxshop.foundation.domain.Template template = this.templateService.getObjByProperty("mark", mark);
      if ((template != null) && (template.isOpen())) {
        String path = request.getSession().getServletContext()
-         .getRealPath("") + 
+         .getRealPath("") +
          File.separator + "vm" + File.separator;
        if (!CommUtil.fileExist(path)) {
          CommUtil.createFolder(path);
@@ -1273,14 +1273,14 @@ import org.springframework.web.servlet.ModelAndView;
        pwrite.print(template.getContent());
        pwrite.flush();
        pwrite.close();
- 
+
        Properties p = new Properties();
-       p.setProperty("file.resource.loader.path", 
+       p.setProperty("file.resource.loader.path",
          request.getRealPath("/") + "vm" + File.separator);
        p.setProperty("input.encoding", "UTF-8");
        p.setProperty("output.encoding", "UTF-8");
        Velocity.init(p);
-       org.apache.velocity.Template blank = Velocity.getTemplate("msg.vm", 
+       org.apache.velocity.Template blank = Velocity.getTemplate("msg.vm",
          "UTF-8");
        VelocityContext context = new VelocityContext();
        context.put("buyer", order.getUser());
@@ -1291,7 +1291,7 @@ import org.springframework.web.servlet.ModelAndView;
        context.put("order", order);
        StringWriter writer = new StringWriter();
        blank.merge(context, writer);
- 
+
        String content = writer.toString();
        this.msgTools.sendSMS(mobile, content);
      }

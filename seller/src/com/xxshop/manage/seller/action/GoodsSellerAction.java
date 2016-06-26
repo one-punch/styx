@@ -1,6 +1,6 @@
  package com.xxshop.manage.seller.action;
 
-          import com.xxshop.core.annotation.SecurityMapping;
+import com.xxshop.core.annotation.SecurityMapping;
 import com.xxshop.core.domain.virtual.SysMap;
 import com.xxshop.core.mv.JModelAndView;
 import com.xxshop.core.query.support.IPageList;
@@ -245,10 +245,11 @@ import org.springframework.web.servlet.ModelAndView;
   @SecurityMapping(title="发布商品第一步", value="/seller/create_products.htm*",rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
   @RequestMapping({"/seller/create_products.htm"})
   public String addProducts(HttpServletRequest request, HttpServletResponse response, String[] id)
-  {	
+  {
 	  User user = this.userService.getObjById(
 		      SecurityUserHolder.getCurrentUser().getId());
 	  Store userStore = user.getStore();
+
 	  StringBuffer ids = new StringBuffer();
 	  for(int i=0; i < id.length; i++){
 		  ids.append(id[i]);
@@ -266,14 +267,17 @@ import org.springframework.web.servlet.ModelAndView;
 		  newGoods.setParent_id(goods.getId());
 		  newGoods.setGoods_name(goods.getGoods_name());
 		  newGoods.setGoods_price(goods.getGoods_price());
+		  newGoods.setStore_price(goods.getStore_price());
 		  newGoods.setGoods_store(userStore);
 		  newGoods.setAddTime(new Date());
+		  newGoods.setGc(goods.getGc());
 		  goodsService.save(newGoods);
 	  }
-	  
+
+
 	  return "redirect:add_products.htm";
   }
-  
+
 
    @SecurityMapping(title="发布商品第一步", value="/seller/add_goods_first.htm*", rtype="seller", rname="商品发布", rcode="goods_seller", rgroup="商品管理", display = false, rsequence = 0)
    @RequestMapping({"/seller/add_goods_first.htm"})
